@@ -470,20 +470,22 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const profile = getProfile();
-    const visitorMessage = profile.question || "I want help with " + (profile.service || "a visa inquiry") + ".";
-    appendBubble(visitorMessage, "assistant-bubble-user");
-
-    const summary = [
-      "Thank you" + (profile.name ? ", " + profile.name : "") + ".",
-      profile.service ? "Service: " + profile.service + "." : "",
-      profile.mobile ? "Mobile: " + profile.mobile + "." : "",
-      profile.email ? "Email: " + profile.email + "." : "",
-      profile.phone ? "Phone: " + profile.phone + "." : "",
-      "Your details are captured. We will come back to you soon."
-    ].filter(Boolean).join(" ");
-
-    appendBubble(summary, "assistant-bubble-ai");
-    await updateStatus();
+    if (!profile.name || !profile.mobile || !profile.service || !profile.question) {
+      appendBubble("Please complete your name, mobile number, service, and question before sending.", "assistant-bubble-ai");
+      return;
+    }
+    const subject = "NextBorder inquiry: " + profile.service;
+    const body = [
+      "New NextBorder website inquiry",
+      "Name: " + profile.name,
+      "Mobile: " + profile.mobile,
+      "Email: " + (profile.email || "Not provided"),
+      "Alternate phone: " + (profile.phone || "Not provided"),
+      "Service: " + profile.service,
+      "Question: " + profile.question
+    ].join("\n");
+    appendBubble("Your email app should open with the inquiry draft. Please press Send to submit it. If it does not open, email nextborder.visa@gmail.com directly.", "assistant-bubble-ai");
+    window.location.href = "mailto:nextborder.visa@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   });
 
   updateStatus();
